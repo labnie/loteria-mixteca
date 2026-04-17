@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
 <title>Ñoo yïvïsiyoo — Lotería mixteca</title>
 <style>
   :root {
@@ -519,5 +520,14 @@ initGame();
 renderDrawn();
 </script>
 
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('App lista para funcionar offline'))
+        .catch(err => console.log('Error:', err));
+    });
+  }
+</script>
 </body>
 </html>
