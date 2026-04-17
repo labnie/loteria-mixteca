@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ñoo yïvïsiyoo — Lotería mixteca</title>
+<style>
+  :root {
+    --bg: #faf7f0;
+    --surface: #ffffff;
+    --border: #d9d2c0;
+    --text: #2c2416;
+    --text-muted: #6b5d44;
+    --accent: #8b4513;
+    --accent-soft: #e8dcc4;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    text-align: center;
+    padding: 1.5rem 1rem 0.5rem;
+  }
+  header h1 {
+    font-size: 2rem;
+    margin: 0;
+    font-style: italic;
+    color: var(--accent);
+  }
+  header p {
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 1rem 0 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+  }
+
+  /* MODO LOTERÍA */
+  .loteria-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .loteria-layout { grid-template-columns: 1fr; }
+  }
+  .card-stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .card-image {
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 3/4;
+    margin: 0 auto;
+    background: var(--accent-soft);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: var(--text-muted);
+    overflow: hidden;
+  }
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .card-name {
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 1rem 0 0.25rem;
+    font-style: italic;
+    color: var(--accent);
+  }
+  .card-translation {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .btn {
+    padding: 0.7rem 1.4rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--accent-soft); }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: #6b3310; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .sidebar h3 {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .drawn-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .drawn-item {
+    aspect-ratio: 3/4;
+    background: var(--accent-soft);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .drawn-item img { width: 100%; height: 100%; object-fit: cover; }
+  .drawn-item .fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 2px;
+    text-align: center;
+  }
+  .progress {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--accent-soft);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+
+  /* MODO EXPLORACIÓN */
+  .explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .explore-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .explore-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .explore-card .thumb {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: var(--accent-soft);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .explore-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .explore-card .name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .explore-card .trans {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+  }
+  .modal .card-image { max-width: 320px; }
+  .modal-close {
+    margin-top: 1rem;
+  }
+
+  .hidden { display: none !important; }
+  .settings-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2rem;
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Ñoo yïvïsiyoo</h1>
+  <p>Nuestra naturaleza · Lotería mixteca</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('loteria')">Modo lotería</button>
+  <button class="tab" onclick="switchTab('explorar')">Modo exploración</button>
+</div>
+
+<main>
+  <!-- MODO LOTERÍA -->
+  <section id="view-loteria">
+    <div class="loteria-layout">
+      <div class="card-stage">
+        <div class="card-image" id="current-image">
+          <img src="assets/images/caratula.jpg" alt="Lotería mixteca" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div class="card-name" id="current-name">Ñoo yïvïsiyoo</div>
+        <div class="card-translation" id="current-translation">Presiona "Cantar siguiente" para comenzar</div>
+        <audio id="audio-player" style="width: 100%; max-width: 420px; margin-top: 0.5rem;" controls></audio>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="drawNext()" id="btn-draw">Cantar siguiente</button>
+          <button class="btn" onclick="replayAudio()" id="btn-replay" disabled>Repetir</button>
+          <button class="btn" onclick="resetGame()">Reiniciar juego</button>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="progress">
+          <span id="progress-text">0 de 0 cartas</span>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0"></div></div>
+        </div>
+        <h3>Cartas cantadas</h3>
+        <div class="drawn-grid" id="drawn-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODO EXPLORACIÓN -->
+  <section id="view-explorar" class="hidden">
+    <div class="explore-grid" id="explore-grid"></div>
+  </section>
+
+  <div class="settings-note">
+    Coloca las imágenes en <code>assets/images/</code> y los audios en <code>assets/audios/</code> con los nombres indicados en la configuración.
+  </div>
+</main>
+
+<!-- Modal para modo exploración -->
+<div class="modal-backdrop" id="modal" onclick="if(event.target===this) closeModal()">
+  <div class="modal">
+    <div class="card-image" id="modal-image"><span>🎴</span></div>
+    <div class="card-name" id="modal-name"></div>
+    <div class="card-translation" id="modal-translation"></div>
+    <audio id="modal-audio" style="width: 100%; margin-top: 0.5rem;" controls></audio>
+    <div class="controls">
+      <button class="btn" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIGURACIÓN DE CARTAS =====
+// Edita esta lista para que coincida con tus archivos reales.
+// Los nombres de archivo deben estar en assets/images/ y assets/audios/
+const CARDS = [
+  { id: "ntinoo",         mix: "Ntiño'o",       esp: "Mar" },
+  { id: "nooyoo",         mix: "Ñó'oyoo",       esp: "Tonal" },
+  { id: "javii",          mix: "Jávii",         esp: "Lluvia" },
+  { id: "ndila",          mix: "Ndilá",         esp: "Pájaro" },
+  { id: "tookuii",        mix: "Tooküí",        esp: "Árboles" },
+  { id: "yoo",            mix: "Yoo",           esp: "Luna" },
+  { id: "kiiti",          mix: "Kiití",         esp: "Animales" },
+  { id: "yuku",           mix: "Yukú",          esp: "Monte" },
+  { id: "javii_shee",     mix: "Jávii shee",    esp: "Huracán" },
+  { id: "nti_ndutia",     mix: "Ntí ndutía",    esp: "Animales marinos" },
+  { id: "nooo",           mix: "Ño'ó",          esp: "Tierra / suelo" },
+  { id: "noo_yiivi",      mix: "Ñoo yïïvï",     esp: "Planeta tierra" },
+  { id: "na_yiivi",       mix: "Ná yíivi",      esp: "Personas" },
+  { id: "tikuii",         mix: "Tiküii",        esp: "Agua" },
+  { id: "tito",           mix: "Títo",          esp: "Leña" },
+  { id: "yiito",          mix: "Yiitó",         esp: "Madera" },
+  { id: "ntito",          mix: "Ntitó",         esp: "Estrellas" },
+  { id: "yuu",            mix: "Yuu",           esp: "Piedra" },
+  { id: "yutia",          mix: "Yuti'a",        esp: "Lago / Río" },
+  { id: "nooo_kayii",     mix: "Ño'ó kayii",    esp: "Fuego" },
+  { id: "ntashi",         mix: "Ntáshi",        esp: "Viento" },
+  { id: "ndikandii",      mix: "Ndikándi",      esp: "Sol" },
+  { id: "nii",            mix: "Ñii",           esp: "Sal" },
+  { id: "kaa",            mix: "Kaa",           esp: "Metal" }
+];
+
+// ===== RUTAS DE ARCHIVOS =====
+// Para cada carta con id="yoo", se buscará:
+//   assets/images/yoo.jpg    (o .png, .jpeg, .webp)
+//   assets/audios/yoo.m4a    (o .m4a, .wav, .ogg)
+const IMAGE_EXT = "jpg";  // Cambia si usas png u otro formato
+const AUDIO_EXT = "m4a";  // Cambia si usas m4a u otro formato
+
+function imagePath(card) { return `assets/images/${card.id}.${IMAGE_EXT}`; }
+function audioPath(card) { return `assets/audios/${card.id}.${AUDIO_EXT}`; }
+
+// ===== ESTADO =====
+let available = [];
+let drawn = [];
+let currentCard = null;
+
+function initGame() {
+  available = CARDS.map((_, i) => i);
+  drawn = [];
+  currentCard = null;
+}
+
+// ===== MODO LOTERÍA =====
+function drawNext() {
+  if (available.length === 0) {
+    document.getElementById('current-translation').textContent = '¡Todas las cartas han sido cantadas! Reinicia para jugar de nuevo.';
+    document.getElementById('btn-draw').disabled = true;
+    return;
+  }
+  const randomIdx = Math.floor(Math.random() * available.length);
+  const cardIdx = available.splice(randomIdx, 1)[0];
+  const card = CARDS[cardIdx];
+  currentCard = card;
+  drawn.push(cardIdx);
+  renderCurrentCard();
+  renderDrawn();
+  playCurrentAudio();
+}
+
+function renderCurrentCard() {
+  const imgContainer = document.getElementById('current-image');
+  imgContainer.innerHTML = '';
+  const img = new Image();
+  img.src = imagePath(currentCard);
+  img.alt = currentCard.mix;
+  img.onerror = () => {
+    imgContainer.innerHTML = `<span style="font-size:1rem; padding:1rem; text-align:center;">${currentCard.mix}<br><small>(imagen no encontrada)</small></span>`;
+  };
+  imgContainer.appendChild(img);
+  document.getElementById('current-name').textContent = currentCard.mix;
+  document.getElementById('current-translation').textContent = currentCard.esp;
+  document.getElementById('btn-replay').disabled = false;
+}
+
+function playCurrentAudio() {
+  const audio = document.getElementById('audio-player');
+  audio.src = audioPath(currentCard);
+  audio.play().catch(err => console.log('Audio no disponible:', err.message));
+}
+
+function replayAudio() {
+  const audio = document.getElementById('audio-player');
+  audio.currentTime = 0;
+  audio.play();
+}
+
+function resetGame() {
+  initGame();
+  document.getElementById('current-image').innerHTML = '<img src="assets/images/caratula.jpg" alt="Lotería mixteca" style="width:100%; height:100%; object-fit:cover;">';
+  document.getElementById('current-name').textContent = 'Ñoo yïvïsiyoo';
+  document.getElementById('current-translation').textContent = 'Presiona "Cantar siguiente" para comenzar';
+  document.getElementById('audio-player').src = '';
+  document.getElementById('btn-draw').disabled = false;
+  document.getElementById('btn-replay').disabled = true;
+  renderDrawn();
+}
+
+function renderDrawn() {
+  const total = CARDS.length;
+  document.getElementById('progress-text').textContent = `${drawn.length} de ${total} cartas`;
+  document.getElementById('progress-fill').style.width = `${(drawn.length/total)*100}%`;
+  const container = document.getElementById('drawn-grid');
+  container.innerHTML = drawn.map(i => {
+    const c = CARDS[i];
+    return `<div class="drawn-item" title="${c.mix} — ${c.esp}">
+      <img src="${imagePath(c)}" alt="${c.mix}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="fallback" style="display:none;">${c.mix}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== MODO EXPLORACIÓN =====
+function renderExplore() {
+  const grid = document.getElementById('explore-grid');
+  grid.innerHTML = CARDS.map((c, i) => `
+    <div class="explore-card" onclick="openModal(${i})">
+      <div class="thumb">
+        <img src="${imagePath(c)}" alt="${c.mix}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent: c.mix}))">
+      </div>
+      <div class="name">${c.mix}</div>
+      <div class="trans">${c.esp}</div>
+    </div>
+  `).join('');
+}
+
+function openModal(i) {
+  const card = CARDS[i];
+  const modal = document.getElementById('modal');
+  const imgBox = document.getElementById('modal-image');
+  imgBox.innerHTML = '';
+  const img = new Image();
+  img.src = imagePath(card);
+  img.onerror = () => { imgBox.innerHTML = `<span>${card.mix}</span>`; };
+  imgBox.appendChild(img);
+  document.getElementById('modal-name').textContent = card.mix;
+  document.getElementById('modal-translation').textContent = card.esp;
+  const audio = document.getElementById('modal-audio');
+  audio.src = audioPath(card);
+  audio.play().catch(() => {});
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+  const audio = document.getElementById('modal-audio');
+  audio.pause();
+  audio.src = '';
+}
+
+// ===== NAVEGACIÓN =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('view-loteria').classList.toggle('hidden', tab !== 'loteria');
+  document.getElementById('view-explorar').classList.toggle('hidden', tab !== 'explorar');
+  if (tab === 'explorar') renderExplore();
+}
+
+// ===== INICIO =====
+initGame();
+renderDrawn();
+</script>
+
+</body>
+</html>
