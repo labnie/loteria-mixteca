@@ -1,0 +1,26 @@
+{
+  "name": "Ñoo yïvïsiyoo — Lotería mixteca",
+  "short_name": "Lotería mixteca",
+  "description": "Lotería sobre la cosmovisión mixteca de la naturaleza",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf7f0",
+  "theme_color": "#8b4513",
+  "lang": "es-MX",
+  "icons": [
+    {
+      "src": "assets/images/caratula.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/caratula.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
